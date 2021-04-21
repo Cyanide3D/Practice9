@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'com.bmuschko.docker-remote-api' version '6.7.0'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+apply plugin: "java"
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+import com.bmuschko.gradle.docker.tasks.image.*
+
+task buildMyAppImage(type: DockerBuildImage) {
+    inputDir = file('docker/myapp')
+    images.add('test/myapp:latest')
+}
+
+task copa(type: Copy) {
+    from "build/libs"
+    into "docker/myapp"
+    include "*.jar"
+}
+
+task run(type: Exec) {
+    commandLine("docker", "run", "test/myapp")
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                'Main-Class': 'ru.simple.Main'
+    }
+}
+
+dependencies {
+
+}
