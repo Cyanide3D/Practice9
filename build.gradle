@@ -15,26 +15,29 @@ repositories {
 
 import com.bmuschko.gradle.docker.tasks.image.*
 
-task buildMyAppImage(type: DockerBuildImage) {
-    inputDir = file('docker/myapp')
-    images.add('test/myapp:latest')
-}
-
-task copa(type: Copy) {
-    from "build/libs"
-    into "docker/myapp"
-    include "*.jar"
-}
-
-task run(type: Exec) {
-    commandLine("docker", "run", "test/myapp")
-}
-
 jar {
     manifest {
         attributes 'Implementation-Title': 'Gradle Quickstart',
                 'Main-Class': 'ru.simple.Main'
     }
+}
+
+task copa(type: Copy) {
+    dependsOn(jar)
+    from "build/libs"
+    into "docker/myapp"
+    include "*.jar"
+}
+
+task buildMyAppImage(type: DockerBuildImage) {
+    dependsOn(copa)
+    inputDir = file('docker/myapp')
+    images.add('test/myapp:latest')
+}
+
+task run(type: Exec) {
+    dependsOn(buildMyAppImage)
+    commandLine("docker", "run", "test/myapp")
 }
 
 dependencies {
